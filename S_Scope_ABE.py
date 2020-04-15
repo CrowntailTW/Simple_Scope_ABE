@@ -59,8 +59,8 @@ from tkinter import messagebox
 # Bring in the AB Electronics code for the i2c interface to their ADC.
 # I had to copy these files into the directory this script is in
 # because I couldn't get the ABE suggested PATH to work for python3.
-from ABE_ADCPi import ADCPi
-from ABE_helpers import ABEHelpers
+#from ABE_ADCPi import ADCPi
+#from ABE_helpers import ABEHelpers
 
 import os # In case we need it later
 
@@ -79,8 +79,8 @@ import os # In case we need it later
 # Set up the i2c communication and the ADC board using code supplied by AB Electronics
 # For now, this routine uses the 240 sps mode at i2c address 0x06a and 0x06b. The Pi I'm using
 # has the AB Electronics RTC at i2c address 0x68
-i2c_helper = ABEHelpers()
-bus = i2c_helper.get_smbus()
+#i2c_helper = ABEHelpers()
+#bus = i2c_helper.get_smbus()
 AD_Res=12 # A/D resolution
 Adrs1=0x6a # A/D i2c bus address 1 (channels 1-4)
 Adrs2=0x6b # A/D i2c bus address 2 (channels 5-8)
@@ -336,34 +336,36 @@ p1.start()
 #            ReadTime_A.value=time.time() # Get a close time stamp of the read completion
 
 
-def ADC_Reader_A()
-    import board
-    import busio
-    
-    import adafruit_ads1x15.ads1115 as ADS #860
-    from adafruit_ads1x15.analog_in import AnalogIn
-    
-    add = '0x48'
-    gain = 4
-    FsCur = 860
-    
-    i2c = busio.I2C(board.SCL, board.SDA)
-    
-    ads = ADS.ADS1115(i2c,address = add) 
+import board
+import busio
 
-    ads.gain = gain
-    ads.data_rate = FsCur
-    ads.mode = 0 #defaut mode is 1 (low power singel shot mode, mode=0 conversion continious mode )
-    
-    #Create single-ended input on channel 0
-    chan = AnalogIn(self.ads, ADS.P0, ADS.P1)
+import adafruit_ads1x15.ads1115 as ADS #860
+from adafruit_ads1x15.analog_in import AnalogIn
+
+add = 72
+gain = 4
+FsCur = 860
+
+i2c = busio.I2C(board.SCL, board.SDA)
+
+ads = ADS.ADS1115(i2c,address = add) 
+
+ads.gain = gain
+ads.data_rate = FsCur
+ads.mode = 0 #defaut mode is 1 (low power singel shot mode, mode=0 conversion continious mode )
+
+#Create single-ended input on channel 0
+chan = AnalogIn(ads, ADS.P0, ADS.P1)
+
+def ADC_Reader_A():
+    global chan
 
     while True:
         
         v = chan.voltage
         print(v)
     
-        ADvalue_A.value = v#adc.read_voltage(My_Chan) # Read from the ADC channel
+        ADvalue_A.value = v * 1e5#adc.read_voltage(My_Chan) # Read from the ADC channel
         ReadTime_A.value = time.time() # Get a close time stamp of the read completion
     
 
@@ -1375,9 +1377,10 @@ class App(Frame):
 if __name__ == '__main__':
 
     # Start up the concurrent A/D reader task
-    p1 = Process(target=ADC_Reader_A,name='ADC_Reader_A',args=(ADchannel_A,ADvalue_A,ReadTime_A,AD_Bits_A,
-                                                               AD_Adrs1_A,AD_Adrs2_A,AD_Set_A,
-                                                               ScopePower,AD_Error_A))
+#    p1 = Process(target=ADC_Reader_A,name='ADC_Reader_A',args=(ADchannel_A,ADvalue_A,ReadTime_A,AD_Bits_A,
+#                                                               AD_Adrs1_A,AD_Adrs2_A,AD_Set_A,
+#                                                               ScopePower,AD_Error_A))
+    p1 = Process(target=ADC_Reader_A,name='ADC_Reader_A')#,args=(ADchannel_A,ADvalue_A,ReadTime_A,AD_Bits_A,
     p1.daemon=True # Setting the daemon True should prevent orphan process when parent exits
     p1.start()
 
