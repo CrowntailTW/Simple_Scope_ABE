@@ -1,5 +1,10 @@
 #!/usr/bin/python3
-
+'''
+https://github.com/McCannon01/Simple_Scope_ABE.git
+https://github.com/McCannon01/Simple_Scope_ABE.git
+https://github.com/McCannon01/Simple_Scope_ABE.git
+https://github.com/McCannon01/Simple_Scope_ABE.git
+'''
 # ===============================================
 # Scope program using ABElectronics ADC Pi 8-Channel ADC
 #
@@ -303,26 +308,64 @@ def askstring(title, prompt, **kw): # String input box suite
 
 
 # Define the ADC reader portion, which will run as a separate process by itself
+'''
+p1 = Process(target=ADC_Reader_A,name='ADC_Reader_A',args=(ADchannel_A,ADvalue_A,ReadTime_A,AD_Bits_A,
+                                                           AD_Adrs1_A,AD_Adrs2_A,AD_Set_A,
+                                                           ScopePower,AD_Error_A))
+p1.daemon=True # Setting the daemon True should prevent orphan process when parent exits
+p1.start()
+'''
+#def ADC_Reader_A(ADchannel_A,ADvalue_A,ReadTime_A,AD_Bits_A,AD_Adrs1_A,AD_Adrs2_A,
+#                 AD_Set_A,ScopePower,AD_Error_A):
+#    global adc
+#    while (True):
+#        # Proceed in the scope is turned on and no A/D errors are pending
+#        if ScopePower.value==1 and AD_Error_A.value==0:
+#            My_Chan=ADchannel_A.value
+#            if My_Chan <1 or My_Chan > 8: # Protect from receiving a bad channel
+#                My_Chan=1
+#            if AD_Set_A.value > 0: # Change the resolution and/or i2c address of the AD board
+#                try:
+#                    adc = ADCPi(bus, AD_Adrs1_A.value, AD_Adrs2_A.value, AD_Bits_A.value)
+#                except IOError:
+#                    AD_Error_A.value=1
+#                AD_Set_A.value = 0
+#        # This read is from an AB Electronics ADC Pi Plus - 8 channel  converter, but
+#        # with a different AD converter, change this to the appropriate method
+#            ADvalue_A.value=adc.read_voltage(My_Chan) # Read from the ADC channel
+#            ReadTime_A.value=time.time() # Get a close time stamp of the read completion
 
-def ADC_Reader_A(ADchannel_A,ADvalue_A,ReadTime_A,AD_Bits_A,AD_Adrs1_A,AD_Adrs2_A,
-                 AD_Set_A,ScopePower,AD_Error_A):
-    global adc
-    while (True):
-        # Proceed in the scope is turned on and no A/D errors are pending
-        if ScopePower.value==1 and AD_Error_A.value==0:
-            My_Chan=ADchannel_A.value
-            if My_Chan <1 or My_Chan > 8: # Protect from receiving a bad channel
-                My_Chan=1
-            if AD_Set_A.value > 0: # Change the resolution and/or i2c address of the AD board
-                try:
-                    adc = ADCPi(bus, AD_Adrs1_A.value, AD_Adrs2_A.value, AD_Bits_A.value)
-                except IOError:
-                    AD_Error_A.value=1
-                AD_Set_A.value = 0
-        # This read is from an AB Electronics ADC Pi Plus - 8 channel  converter, but
-        # with a different AD converter, change this to the appropriate method
-            ADvalue_A.value=adc.read_voltage(My_Chan) # Read from the ADC channel
-            ReadTime_A.value=time.time() # Get a close time stamp of the read completion
+
+def ADC_Reader_A()
+    import board
+    import busio
+    
+    import adafruit_ads1x15.ads1115 as ADS #860
+    from adafruit_ads1x15.analog_in import AnalogIn
+    
+    add = '0x48'
+    gain = 4
+    FsCur = 860
+    
+    i2c = busio.I2C(board.SCL, board.SDA)
+    
+    ads = ADS.ADS1115(i2c,address = add) 
+
+    ads.gain = gain
+    ads.data_rate = FsCur
+    ads.mode = 0 #defaut mode is 1 (low power singel shot mode, mode=0 conversion continious mode )
+    
+    #Create single-ended input on channel 0
+    chan = AnalogIn(self.ads, ADS.P0, ADS.P1)
+
+    while True:
+        
+        v = chan.voltage
+        print(v)
+    
+        ADvalue_A.value = v#adc.read_voltage(My_Chan) # Read from the ADC channel
+        ReadTime_A.value = time.time() # Get a close time stamp of the read completion
+    
 
 # Set up the graphic area where the trace is displayed
 class Trace(Frame):
